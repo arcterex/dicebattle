@@ -131,15 +131,18 @@ sub dice_battle {
    my %r2 = %results_hash;
    my @sorted_results = sort { $results_hash{$b} <=> $results_hash{$a} } keys %results_hash;
 
-   if( $sort_by_number ) {
+   # Sort results by the dice number or the result number
+   if( ! $sort_by_number ) {
+      # Sort by the dice
       foreach my $r (@sorted_results) {
-         print "Battle result = $r - Happened " . $results_hash{$r} . " times\n";
+         print "Battle result: Die $r - won " . $results_hash{$r} . " times\n";
       }
    } 
    else 
    {
+      # Sort by the result (with -n)
       foreach my $key ( sort { $a <=> $b} keys %results_hash ) {
-         print "Battle Result = $key - Happened " . $results->{$key} . " times\n";
+         print "Battle Result: Die $key - won " . $results->{$key} . " times\n";
       }
    }
 }
@@ -157,7 +160,7 @@ if( $help ) {
    print "Set number of skill and penalty dice from the command line with:\n\n";
    print " --skill, -s <number>     Skill dice to roll\n";
    print " --penalty, -p <number>   Penalty dice to roll\n";
-   print " --number_sort            Sort result by number not dice number\n";
+   print " --number_sort            Sort result by dice number not result number\n";
    print "\n";
    exit;
 }
