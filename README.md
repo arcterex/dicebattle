@@ -7,13 +7,14 @@ A simple dice stats program for my buddy SP.
 1. Roll X number of 6-sided dice (iterate through 1 to 5) (SkillDice)
 2. Roll Y number of 6-sided dice (iterate through 0 to 5) (PenaltyDice)
 3. For each Y, if there is an X then cancel it out
-             example: if you rolled 3 Skill Dice of 5,3,2 and 3 PenaltyDice 
-             of 5,2,1, then the 5 and 2 would cancel, leaving just a 3 for the 
-             SkillDice
+
+> example: if you rolled 3 Skill Dice of 5,3,2 and 3 PenaltyDice 
+> of 5,2,1, then the 5 and 2 would cancel, leaving just a 3 for the 
+> SkillDice
 4. Take the highest number that are still on the SkillDice (note that it 
 can be 0 if all of the SkillDice were canceled by PenaltyDice).  In the 
 example above, "3" would be the highest number
-step 5: Iterate through $somehighnumber for each combination of SkillDice and 
+5. Iterate through $somehighnumber for each combination of SkillDice and 
 PenaltyDice (1-5 SkillDice * 0-5 PenaltyDice = 30 combinations) and record 
 number of hits for each number so that I can do stats.
 
