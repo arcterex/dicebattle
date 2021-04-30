@@ -27,6 +27,9 @@ my $dice_sides = 6;
 my $debug = 0;
 my $help = 0;
 
+# sort resulting stats by dice number instead of number of results
+my $sort_by_number = 0;
+
 # default number of dice to roll in the dice battle if not set from command
 my $num_skill   = 20;
 my $num_penalty = 20;
@@ -122,9 +125,21 @@ sub dice_battle {
 
    print Dumper $results if $debug;
    print "Total iterations = $total_iterations\n";
+
    # sort the hash
-   foreach my $key ( sort { $a <=> $b} keys %results_hash ) {
-      print "Battle Result = $key - Happened " . $results->{$key} . " times\n";
+   my %r2 = %results_hash;
+   my @sorted_results = sort { $results_hash{$b} <=> $results_hash{$a} } keys %results_hash;
+
+   if( $sort_by_number ) {
+      foreach my $r (@sorted_results) {
+         print "Battle result = $r - Happened " . $results_hash{$r} . " times\n";
+      }
+   } 
+   else 
+   {
+      foreach my $key ( sort { $a <=> $b} keys %results_hash ) {
+         print "Battle Result = $key - Happened " . $results->{$key} . " times\n";
+      }
    }
 }
 
@@ -132,14 +147,16 @@ sub dice_battle {
 GetOptions( "skill=i"      => \$num_skill,
             "penalty=i"    => \$num_penalty,
             "debug"        => \$debug,
+            "number_sort"  => \$sort_by_number,
             "help"         => \$help)
             or die("Error in command line arguments\n");
 
 if( $help ) {
    print "Help:\n";
    print "Set number of skill and penalty dice from the command line with:\n\n";
-   print " --skill, -s <number>\n";
-   print " --penalty, -p <number>\n";
+   print " --skill, -s <number>     Skill dice to roll\n";
+   print " --penalty, -p <number>   Penalty dice to roll\n";
+   print " --number_sort            Sort result by number not dice number\n";
    print "\n";
    exit;
 }
@@ -147,6 +164,6 @@ if( $help ) {
 print "Doing battle!\n";
 print "Skill dice:   $num_skill\n";
 print "Penalty dice: $num_penalty\n";
-print "\n..... FIGHT!\n\n";
+print "\n..... FIGHT!.... \n\n";
 
 dice_battle($num_skill, $num_penalty);
