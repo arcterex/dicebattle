@@ -119,12 +119,13 @@ sub dice_battle {
          my $final_result = $roll_result[0];
          print "$i vs $j = $final_result\n" if $debug;
          $results->{$final_result} += 1;
+         print ".";
       }
    }
    my %results_hash = %$results;
 
    print Dumper $results if $debug;
-   print "Total iterations = $total_iterations\n";
+   print "\n\nTotal iterations = $total_iterations\n\n";
 
    # sort the hash
    my %r2 = %results_hash;
