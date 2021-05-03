@@ -24,6 +24,7 @@ use Getopt::Long;
 
 # Globals
 my $dice_sides = 6;
+my $runs = 10;
 my $debug = 0;
 my $help = 0;
 
@@ -47,17 +48,18 @@ sub roll_dice() {
 # Roll the dice a certain number of times and return an array of the random results
 sub roll_num_dice {
    my $num_dice = shift;
-   print "Rolling $num_dice dice\n" if $debug;
+   print "Rolling $num_dice dice... " if $debug;
    my @roll = ();
    foreach(1..$num_dice) {
       my $roll_number = roll_dice();
+      print "$roll_number\n" if $debug;
       push(@roll, $roll_number);
    }
    return @roll;
 }
 
-# take two arrays of random numbers and compare, eliminate, and return an array 
-# with just the remaining values with the highest one at $array[0];
+# take two arrays of random numbers and compare, eliminate, and return 
+# just an integer from 0-6 with the winning number in it
 sub compare_rolls {
    my ($skill, $bad) = @_;
 
@@ -93,35 +95,53 @@ sub compare_rolls {
 
    print "Highest number = $skill[0]\n" if $debug;
    
-   return @skill;
+   #   return @skill;
+   return $skill[0];
 }
 
-# Base test case
-#my @skill_roll_result   = roll_num_dice(15);
-#my @penalty_roll_result = roll_num_dice(0);
-#my @complete_roll = compare_rolls(\@skill_roll_result, \@penalty_roll_result);
-
 # roll through each iteration of 1..$skill and 0..$penalty and record the results
+# Goal is to get the stats on each individual combination.  I'm going to store 
+# these in a nested hash with the following format
+
+# New way of doing it with N iterations of just the number given
+# Store the stats as follows:
+# ie: 1 vs 2 penalty dice
+# $var->{"1,2"}->{1}->3    # in 1s vs 2p the number 1 came out, 2 times, 2, 1
+#              ->{2}->1    # time, 3 7 times, etc.
+#              ->{3}->7
+#     ->{"2,2"}->{1}->0
+#              ->{2}->4
+#              ->{3}->2 etc
+
 sub dice_battle {
    my $total_iterations = 0;
    my ($skill, $penalty) = @_;
    my $results = {};
 
-   # loop through 1..$skill
-   for( my $i = 1; $i <= $skill; $i++ ) {
-      for( my $j = 0; $j <= $penalty; $j++ ) {
-         print "Skill = $i vs Pentalty = $j\n" if $debug;
-         $total_iterations++;
-         my @skill_result = roll_num_dice($i);
-         my @penalty_result = roll_num_dice($j);
-         my @roll_result = compare_rolls(\@skill_result, \@penalty_result);
+   # Have to do this all $runs times
+   for( 0..$runs ) {
+      # loop through 1..$skill
+      for( my $i = 1; $i <= $skill; $i++ ) {
+         for( my $j = 0; $j <= $penalty; $j++ ) {
+            print "Skill = $i vs Pentalty = $j\n" if $debug;
+            $total_iterations++;
+            my @skill_result = roll_num_dice($i);
+            my @penalty_result = roll_num_dice($j);
+            my $roll_result = compare_rolls(\@skill_result, \@penalty_result);
 
-         my $final_result = $roll_result[0];
-         print "$i vs $j = $final_result\n" if $debug;
-         $results->{$final_result} += 1;
-         print ".";
+            print "$i vs $j = $roll_result\n" if $debug;
+            # $results->{$final_result} += 1;
+            my $key = "$i,$j";
+            $results->{$key}->{$roll_result}++;
+            print "Adding 1 to $key -> $roll_result\n" if $debug;
+         }
       }
    }
+
+   print "Results of battle: ";
+   print Dumper $results;
+
+=pod
    my %results_hash = %$results;
 
    print Dumper $results if $debug;
@@ -145,6 +165,7 @@ sub dice_battle {
          print "Battle Result: Die $key - won " . $results->{$key} . " times\n";
       }
    }
+=cut
 }
 
 # --------------- Main code -------------------
@@ -152,6 +173,7 @@ GetOptions( "skill=i"      => \$num_skill,
             "penalty=i"    => \$num_penalty,
             "debug"        => \$debug,
             "number_sort"  => \$sort_by_number,
+            "runs=i"       => \$runs,
             "help"         => \$help)
             or die("Error in command line arguments\n");
 
@@ -165,7 +187,8 @@ if( $help ) {
    exit;
 }
 
-print <<"END"; 
+if( ! $debug ) {
+   print <<"END"; 
 
 ▓█████▄  ██▓ ▄████▄  ▓█████     ▄▄▄▄    ▄▄▄     ▄▄▄█████▓▄▄▄█████▓ ██▓    ▓█████
 ▒██▀ ██▌▓██▒▒██▀ ▀█  ▓█   ▀    ▓█████▄ ▒████▄   ▓  ██▒ ▓▒▓  ██▒ ▓▒▓██▒    ▓█   ▀
@@ -180,9 +203,19 @@ print <<"END";
 
 END
 
-print "Doing battle!\n";
-print "Skill dice:   $num_skill\n";
-print "Penalty dice: $num_penalty\n";
-print "\n..... FIGHT!.... \n\n";
+   print "Doing battle!\n";
+   print "Skill dice:   $num_skill\n";
+   print "Penalty dice: $num_penalty\n";
+   print "\n..... FIGHT!.... \n\n";
+}
+if( $debug ) {
+   print <<"END";
+Runs:          $runs
+Skill Dice:    $num_skill
+Penalty Dice:  $num_penalty
+
+
+END
+}
 
 dice_battle($num_skill, $num_penalty);
