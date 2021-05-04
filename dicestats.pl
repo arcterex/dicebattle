@@ -169,10 +169,12 @@ sub dice_battle {
 sub display_results {
    my ($results, $skill, $penalty) = @_;
 
-   print "Results of battle: ";
-   print Dumper $results;
+   print "Results of battle (sorted by ";
+   print $sort_by_number ? "die" : "result";
+   print "): \n";
+   print Dumper $results if $debug;
 
-   my @keys = keys %{ $results };
+   #   my @keys = keys %{ $results };
    
    # First iterate through each set of dice rolls, and create the keys and 
    # then display the results from each
@@ -184,8 +186,20 @@ sub display_results {
          # now loop through the hash for this key
          my $key = "$i,$j";
          my $r = $results->{$key};
-         foreach( sort keys %{ $r } ) {
-            print "Die: $_ wins: $results->{$key}->{$_}\n";
+
+         if( $sort_by_number ) {
+            print "Sorted by dice number\n" if $debug;
+            print Dumper $r if $debug;
+            foreach( sort keys %{ $r } ) {
+               print "Die: $_ wins: $results->{$key}->{$_}\n";
+            }
+         } else {
+            print "Sorted by result number\n" if $debug;
+            print Dumper $r if $debug;
+            foreach my $die( sort { $r->{$a} <=> $r->{$b} } keys %$r ) {
+               print "Die: $die wins: $r->{$die}\n";
+            }
+            
          }
          print "\n";
       }
@@ -228,8 +242,9 @@ if( ! $debug ) {
 END
 
    print "Doing battle!\n";
-   print "Skill dice:   $num_skill\n";
+   print "Skill dice  : $num_skill\n";
    print "Penalty dice: $num_penalty\n";
+   print "Iterations  : $runs\n";
    print "\n..... FIGHT!.... \n\n";
 }
 if( $debug ) {
