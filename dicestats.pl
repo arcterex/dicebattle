@@ -138,9 +138,7 @@ sub dice_battle {
       }
    }
 
-   print "Results of battle: ";
-   print Dumper $results;
-
+   display_results($results, $skill, $penalty);
 =pod
    my %results_hash = %$results;
 
@@ -166,6 +164,49 @@ sub dice_battle {
       }
    }
 =cut
+}
+
+sub compare{
+   $a =~ s/-.*//;
+   $b =~ s/-.*//;
+
+   if( $a  < $b ) { return -1; }
+   if( $a == $b ) { return 0;  }
+   if( $a  > $b ) { return 1;  }
+}
+
+sub display_results {
+   my ($results, $skill, $penalty) = @_;
+
+   print "Results of battle: ";
+   print Dumper $results;
+
+   my @keys = keys %{ $results };
+   #my @foo = sort {$a <=> $b} @keys;
+   #my @sorted_keys = sort compare @keys;
+   #print Dumper \@sorted_keys;
+   
+   # First iterate through each set of dice rolls, and create the keys and 
+   # then display the results from each
+   print <<"END";
+Skill | Penalty | Results
+------+---------+--------
+END
+
+   for( my $i = 1; $i <= $skill; $i++ ) {
+      for( my $j = 0; $j <= $penalty; $j++ ) {
+         print "Skill: $i Penalty: $j\n";
+         print "---------------------\n";
+         # now loop through the hash for this key
+         my $key = "$i,$j";
+         print Dumper $results->{$key};
+         my @keys = %{ $results->{$key} };
+         foreach( @keys ) {
+            print "Key = $_\n";
+            print "Die: $_ Won: " . $results->{$key}->{$_} . "\n";
+         }
+      }
+   }
 }
 
 # --------------- Main code -------------------
