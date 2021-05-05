@@ -66,9 +66,29 @@ sub compare_rolls {
    my @skill = @$skill;
    my @bad   = @$bad;
 
-   print "Skill\n" . Dumper \@skill if $debug;
-   print "Penalty\n"   . Dumper \@bad if $debug;
+   @skill = reverse sort @skill;
+   @bad = reverse sort @bad;
 
+   print "-> Skill\n" . Dumper \@skill if $debug;
+   print "-> Penalty\n"   . Dumper \@bad if $debug;
+   
+   # First thing is shortcut a couple of things.
+   # 1 - if the size of @bad is zero, then the top dice in @skill
+   # automatically wins
+   # 2 - if the max number in @skill is higher than the max number in @bad
+   # it automatically wins
+
+   if( ! @bad ) { 
+      print "Shortcut! Zero size bad array, returning skill max\n" if $debug;
+      return $skill[0]; 
+   }
+
+   if( $skill[0] > $bad[0] ) {
+      print "Shortcut! Skill max > bad max, returning skill max\n" if $debug;
+      return $skill[0];
+   }
+   
+   # No shortcuts, iterate through the arrays
    for ( my $i = 0; $i < @skill; $i++ ) {
       next if( ! defined $skill[$i] );
 
