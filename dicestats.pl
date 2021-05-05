@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Getopt::Long;
+use List::Util qw( min max );
 
 # Dice Battle 1.0
 # Takes two command line arguments, --skill or -s and --penalty or -p, this is 
@@ -66,9 +67,6 @@ sub compare_rolls {
    my @skill = @$skill;
    my @bad   = @$bad;
 
-   @skill = reverse sort @skill;
-   @bad = reverse sort @bad;
-
    print "-> Skill\n" . Dumper \@skill if $debug;
    print "-> Penalty\n"   . Dumper \@bad if $debug;
    
@@ -83,9 +81,9 @@ sub compare_rolls {
       return $skill[0]; 
    }
 
-   if( $skill[0] > $bad[0] ) {
+   if( max @skill > max @bad ){
       print "Shortcut! Skill max > bad max, returning skill max\n" if $debug;
-      return $skill[0];
+      return max @skill;
    }
    
    # No shortcuts, iterate through the arrays
