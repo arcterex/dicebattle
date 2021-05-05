@@ -27,6 +27,7 @@ use List::Util qw( min max );
 my $dice_sides = 6;
 my $runs = 10;
 my $debug = 0;
+my $max_debug = 0;
 my $help = 0;
 
 # sort resulting stats by dice number instead of number of results
@@ -49,11 +50,11 @@ sub roll_dice() {
 # Roll the dice a certain number of times and return an array of the random results
 sub roll_num_dice {
    my $num_dice = shift;
-   print "Rolling $num_dice dice... " if $debug;
+   print "Rolling $num_dice dice... " if $max_debug;
    my @roll = ();
    foreach(1..$num_dice) {
       my $roll_number = roll_dice();
-      print "$roll_number\n" if $debug;
+      print "$roll_number\n" if $max_debug;
       push(@roll, $roll_number);
    }
    return @roll;
@@ -67,8 +68,8 @@ sub compare_rolls {
    my @skill = @$skill;
    my @bad   = @$bad;
 
-   print "-> Skill\n" . Dumper \@skill if $debug;
-   print "-> Penalty\n"   . Dumper \@bad if $debug;
+   print "-> Skill\n" . Dumper \@skill if $max_debug;
+   print "-> Penalty\n"   . Dumper \@bad if $max_debug;
    
    # First thing is shortcut a couple of things.
    # 1 - if the size of @bad is zero, then the top dice in @skill
@@ -104,14 +105,14 @@ sub compare_rolls {
    @skill = grep defined, @skill;
    @skill = sort { $b <=> $a} @skill;
 
-   print "\n----\nEnding array:\n" . Dumper \@skill if $debug;
+   print "\n----\nEnding array:\n" . Dumper \@skill if $max_debug;
 
    # special case = our array is 0 length because everything is eliminated
    if( !@skill ) {
       @skill = (0);
    }
 
-   print "Highest number = $skill[0]\n" if $debug;
+   print "Highest number = $skill[0]\n" if $max_debug;
    
    #   return @skill;
    return $skill[0];
@@ -147,41 +148,16 @@ sub dice_battle {
             my @penalty_result = roll_num_dice($j);
             my $roll_result = compare_rolls(\@skill_result, \@penalty_result);
 
-            print "$i vs $j = $roll_result\n" if $debug;
+            print "$i vs $j = $roll_result\n" if $max_debug;
             # $results->{$final_result} += 1;
             my $key = "$i,$j";
             $results->{$key}->{$roll_result}++;
-            print "Adding 1 to $key -> $roll_result\n" if $debug;
+            print "Adding 1 to $key -> $roll_result\n" if $max_debug;
          }
       }
    }
 
    display_results($results, $skill, $penalty);
-=pod
-   my %results_hash = %$results;
-
-   print Dumper $results if $debug;
-   print "\n\nTotal iterations = $total_iterations\n\n";
-
-   # sort the hash
-   my %r2 = %results_hash;
-   my @sorted_results = sort { $results_hash{$b} <=> $results_hash{$a} } keys %results_hash;
-
-   # Sort results by the dice number or the result number
-   if( ! $sort_by_number ) {
-      # Sort by the dice
-      foreach my $r (@sorted_results) {
-         print "Battle result: Die $r - won " . $results_hash{$r} . " times\n";
-      }
-   } 
-   else 
-   {
-      # Sort by the result (with -n)
-      foreach my $key ( sort { $a <=> $b} keys %results_hash ) {
-         print "Battle Result: Die $key - won " . $results->{$key} . " times\n";
-      }
-   }
-=cut
 }
 
 sub display_results {
@@ -207,13 +183,13 @@ sub display_results {
 
          if( $sort_by_number ) {
             print "Sorted by dice number\n" if $debug;
-            print Dumper $r if $debug;
+            print Dumper $r if $max_debug;
             foreach( sort keys %{ $r } ) {
                print "Die: $_ wins: $results->{$key}->{$_}\n";
             }
          } else {
             print "Sorted by result number\n" if $debug;
-            print Dumper $r if $debug;
+            print Dumper $r if $max_debug;
             foreach my $die( sort { $r->{$a} <=> $r->{$b} } keys %$r ) {
                print "Die: $die wins: $r->{$die}\n";
             }
@@ -229,6 +205,7 @@ GetOptions( "skill=i"      => \$num_skill,
             "penalty=i"    => \$num_penalty,
             "debug"        => \$debug,
             "number_sort"  => \$sort_by_number,
+            "max_debug"    => \$max_debug,
             "runs=i"       => \$runs,
             "help"         => \$help)
             or die("Error in command line arguments\n");
@@ -239,6 +216,8 @@ if( $help ) {
    print " --skill, -s <number>     Skill dice to roll\n";
    print " --penalty, -p <number>   Penalty dice to roll\n";
    print " --number_sort            Sort result by dice number not result number\n";
+   print " --debug                  Debug mode\n";
+   print " --max_debug              Tons of extra crap\n";
    print "\n";
    exit;
 }
